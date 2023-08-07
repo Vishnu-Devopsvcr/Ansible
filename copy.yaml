@@ -1,0 +1,12 @@
+---
+- name: Deploy files and systemd service
+  hosts: callserver
+  gather_facts: no
+  become: yes
+
+  tasks:
+  - name: Copy file from local bastion host to remote host home directory
+    copy:
+      src: /home/mohank_flexydial/playbook/file_copy/rollback-pull.sh
+      dest: "/home/{{ ansible_user }}/"
+      mode: 0755

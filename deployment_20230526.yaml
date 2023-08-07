@@ -1,0 +1,59 @@
+---
+- name: Deploy files and systemd service
+  hosts: callserver
+  gather_facts: no
+  become: yes
+
+  tasks:
+  - name: Copy inactivecall_force_hangup_script.py to remote host
+    copy: 
+      src: /home/mohank_flexydial/playbook/deploy_code/inactivecall_force_hangup_script.py
+      dest: /home/app/scripts/inactivecall_force_hangup_script.py
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Copy inactivecall_force_hangup.py to remote host
+    copy: 
+      src: /home/mohank_flexydial/playbook/deploy_code/inactivecall_force_hangup.py
+      dest: /home/app/scripts/management/commands/inactivecall_force_hangup.py
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Deploy systemd service
+    copy:
+      content: |
+        [Unit]
+        Description=FlexyDial inactive channel force hangup on FS
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        RestartSec=1
+        ExecStart=/usr/bin/docker run --rm --env-file /etc/default/flexydial-app -v /home/app/scripts/inactivecall_force_hangup_script.py:/home/app/scripts/inactivecall_force_hangup_script.py -v /home/app/scripts/management/commands/inactivecall_force_hangup.py:/home/app/scripts/management/commands/inactivecall_force_hangup.py --name flexydial-inactive-fs-hangup vedakatta/flexydial-app python manage.py inactivecall_force_hangup
+        ExecStop=/usr/bin/docker stop flexydial-inactive-fs-hangup
+
+        [Install]
+        WantedBy=multi-user.target
+      dest: /etc/systemd/system/flexydial-inactive-fs-hangup-docker.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Reload systemd
+    command: systemctl daemon-reload
+
+  - name: Enable systemd service
+    systemd:
+      name: flexydial-inactive-fs-hangup-docker
+      enabled: yes
+
+  - name: Start systemd service
+    systemd:
+      name: flexydial-inactive-fs-hangup-docker
+      state: started
+...
+

@@ -1,0 +1,33 @@
+---
+# Author: mohan.kumar@flexydial.com
+# Description: Ansible playbook to get the server uptime of all call servers and write the output to a CSV file
+
+- name: Get server uptime and write to CSV
+  hosts: callserver
+  gather_facts: no
+  tasks:
+    - name: Get server uptime
+      command: "uptime -p | sed 's/^up //' | awk '{print $1 \" days \" $2 \" hours\"}'"
+      register: uptime_output
+
+    - name: Set output file name with timestamp
+      set_fact:
+        output_file: "server_uptime_{{ lookup('pipe', 'date +%Y_%m_%d_%H_%M') }}.csv"
+
+    - name: Create CSV header
+      lineinfile:
+        path: '/home/mohank_flexydial/playbook/uptime_report/{{ output_file }}'
+        line: 'Sr#,Server IP,Uptime'
+        create: yes
+        state: present
+        regexp: '^Sr#'
+      delegate_to: localhost
+      run_once: true
+
+    - name: Add server uptime to CSV
+      lineinfile:
+        path: '/home/mohank_flexydial/playbook/uptime_report/{{ output_file }}'
+        line: "{{ (play_hosts.index(inventory_hostname) + 1) }},{{ inventory_hostname }},{{ uptime_output.stdout }}"
+        insertafter: EOF
+      delegate_to: localhost
+

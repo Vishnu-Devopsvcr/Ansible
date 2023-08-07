@@ -1,0 +1,29 @@
+---
+- name: Execute commands on remote host using command module
+  hosts: callserver
+  become: yes
+  gather_facts: no
+  tasks:
+          #    - name: Execute 'sofia status' command
+          #      command: "fs_cli -x 'sofia status'"
+          #      register: sofia_status_result
+          #
+          #    - name: Execute 'netstat' command to check for freeswitch
+          #      command: "bash -c 'netstat -tuplen | grep freeswitch'"
+          #      register: netstat_result
+
+    - name: Get last 20 lines of flexydial-cdr logs from Docker
+      command: "docker logs flexydial-inactive-fs-hangup --tail=20"
+      register: docker_logs_result
+
+      #    - name: Display Sofia status result
+      #      debug:
+      #        msg: "{{ sofia_status_result.stdout }}"
+      #
+      #    - name: Display Netstat result
+      #      debug:
+      #        msg: "{{ netstat_result.stdout }}"
+      #
+    - name: Display Docker logs result
+      debug:
+        msg: "{{ docker_logs_result.stdout }}"
