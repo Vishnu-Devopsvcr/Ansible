@@ -1,0 +1,20 @@
+---
+- name: Execute commands on remote host using command module
+  hosts: callserver
+  become: yes
+  gather_facts: no
+
+  vars_prompt:
+    - name: "execute_command"
+      prompt: "Please enter the command to execute"
+      private: no
+
+  tasks:
+    - name: Execute command on remote host
+      command: "{{ execute_command }}"
+      register: command_result
+
+    - name: Display command result
+      debug:
+        msg: "{{ command_result.stdout }}"
+
