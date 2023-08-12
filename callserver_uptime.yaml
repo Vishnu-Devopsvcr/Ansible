@@ -1,5 +1,5 @@
 ---
-# Author: mohan.kumar@flexydial.com
+# Author: vishnucse523@gmail.com
 # Description: Ansible playbook to get the server uptime of all call servers and write the output to a CSV file
 
 - name: Get server uptime and write to CSV
@@ -16,7 +16,7 @@
 
     - name: Create CSV header
       lineinfile:
-        path: '/home/mohank_flexydial/playbook/uptime_report/{{ output_file }}'
+        path: '/home/vishnu/playbook/uptime_report/{{ output_file }}'
         line: 'Sr#,Server IP,Uptime'
         create: yes
         state: present
@@ -26,7 +26,7 @@
 
     - name: Add server uptime to CSV
       lineinfile:
-        path: '/home/mohank_flexydial/playbook/uptime_report/{{ output_file }}'
+        path: '/home/vishnu/playbook/uptime_report/{{ output_file }}'
         line: "{{ (play_hosts.index(inventory_hostname) + 1) }},{{ inventory_hostname }},{{ uptime_output.stdout }}"
         insertafter: EOF
       delegate_to: localhost
